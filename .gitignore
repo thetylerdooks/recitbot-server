@@ -1,0 +1,20 @@
+node_modules/
+.wrangler/
+.dev.vars
+.dev.vars.*
+worker/public/
+.e2e/
+.wintest/
+*.log
+shots/*.mp4
+build/
+worker/src/generated.ts
+shots/*.json
+shots/*.png
+worker/src/generated-web.ts
+worker/src/generated-home.ts
+# Each deployment's own Wrangler config (ids, domains). Committed: wrangler.example.jsonc (template), wrangler.test.jsonc.
+worker/wrangler.jsonc
+!worker/.dev.vars.example
+# Each deployment's own homepage, if it has one (scripts/sync-home.mjs).
+/worker/home/

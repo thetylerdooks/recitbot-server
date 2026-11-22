@@ -1,0 +1,36 @@
+{
+  "name": "agent-recorder",
+  "private": true,
+  "version": "0.1.0",
+  "license": "Elastic-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-recorder-zip.mjs && node scripts/build-web.mjs && node scripts/sync-home.mjs",
+    "dev:vars": "node scripts/gen-dev-vars.mjs",
+    "dev": "npm run build && npm run dev:vars && npm run db:migrate:local && wrangler dev -c worker/wrangler.test.jsonc --ip 127.0.0.1 --port 8787",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local -c worker/wrangler.test.jsonc",
+    "test": "npm run build && vitest run -c worker/vitest.config.ts",
+    "typecheck": "npm run build && tsc -p worker/tsconfig.json",
+    "e2e": "node scripts/e2e.mjs",
+    "e2e:audio": "node scripts/audio-e2e.mjs",
+    "selftest:latency": "node scripts/start-latency.mjs",
+    "deploy:prod": "node scripts/deploy-prod.mjs",
+    "check:literals": "node scripts/check-selfhost-literals.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.23.0",
+    "@cloudflare/workers-types": "^5.20261115.1",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@types/node": "^24.19.2",
+    "typescript": "5.9",
+    "vitest": "~4.1",
+    "wrangler": "^4.162.0"
+  },
+  "dependencies": {
+    "tldts": "^7.5.4",
+    "zod": "^4.4.3"
+  }
+}

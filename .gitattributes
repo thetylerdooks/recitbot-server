@@ -1,0 +1,36 @@
+# Served to Macs and run by /bin/bash: must stay LF on every checkout (their SHA-256 is pinned).
+*.sh text eol=lf
+
+# Mac sources, plists and entitlements are built/signed on macOS: a CRLF checkout on
+# Windows breaks codesign (Recitbot.entitlements) and the tarballs shipped to the Mac builder.
+mac/** text eol=lf
+recorder-mac/** text eol=lf
+# ...except real binaries under those trees.
+*.zip binary
+*.png binary
+*.icns binary
+*.p12 binary
+*.cer binary
+
+# Signed releases are served byte for byte (their SHA-256 and size are in a signed manifest): never convert line ends.
+recorder/release/** -text
+recorder-mac/install.sh -text
+recorder-mac/update-macos.json -text
+recorder-mac/hashes.txt -text
+
+# Not part of the public server: `git archive` (the clean server snapshot) leaves these out. The server build serves the
+# signed recorder releases in recorder/release/ and recorder-mac/ and needs no client source.
+/mac export-ignore
+/recorder/AgentRecorder.cs export-ignore
+/recorder/AgentRecorder.exe.config export-ignore
+/recorder/AgentRecorder.manifest export-ignore
+/recorder/README.md export-ignore
+/recorder/install.template.ps1 export-ignore
+/recorder/uninstall.ps1 export-ignore
+/recorder-mac/install.template.sh export-ignore
+
+# Verbatim license text (its SHA-256 is checked): never convert line ends.
+LICENSE -text
+
+# Recorded test outputs, compared byte for byte.
+worker/test/golden/** text eol=lf

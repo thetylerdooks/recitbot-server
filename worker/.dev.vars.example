@@ -1,0 +1,27 @@
+# Local secrets for `wrangler dev` (copy to worker/.dev.vars, which is git-ignored; `npm run dev:vars` writes random
+# values for the required ones). Placeholders only: never commit real values. In production set each with
+# `wrangler secret put <NAME> --env production`. SELFHOST_CONFIG.md explains every name.
+
+# Required (random, 32+ bytes each, e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`).
+SHARE_HMAC_KEY=replace-me
+UPLOAD_HMAC_KEY=replace-me
+DEVICE_CMD_KEY=replace-me
+IP_HASH_KEY=replace-me
+INSTALLER_URL_KEY=replace-me
+
+# Optional: the one-time owner claim on a fresh server (POST /claim; random, 32+ bytes). Delete it once claimed.
+# OWNER_CLAIM_SECRET=replace-me
+
+# Optional: Turnstile (production keys; local dev uses the public test keys in worker/wrangler.test.jsonc).
+# TURNSTILE_SITE_KEY=replace-me
+# TURNSTILE_SECRET_KEY=replace-me
+
+# Optional: billing (Stripe). Billing is on only with both of these plus STRIPE_PRO_PRICE_ID.
+# STRIPE_SECRET_KEY=replace-me
+# STRIPE_WEBHOOK_SECRET=replace-me
+
+# Optional: custom video domains (Cloudflare for SaaS), with CF_ZONE_ID and CUSTOM_DOMAIN_CNAME_TARGET.
+# CF_SAAS_API_TOKEN=replace-me
+
+# Optional, loopback dev only: log sign-in links and codes instead of emailing them. Never in production.
+# OAUTH_DEV_LOG_LINKS=1

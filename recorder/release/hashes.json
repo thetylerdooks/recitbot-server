@@ -1,0 +1,8 @@
+{
+  "recorder_version": "0.6.2",
+  "recitbot_exe_sha256": "1A12A2C78181B2D51CF30578790CDB1DAC0A56CB9EF4E4D9C853646A95C0B76B",
+  "recorder_zip_sha256": "FAA609C1CF536AD999BE01CE57F4B82F987AF077D87D09688A30F7CAFF8F738A",
+  "install_ps1_sha256": "22A31531B871B440E51D32A2D4C2C89227B30E15DBF1928397ADCF53139614F9",
+  "compiler": "microsoft.net.compilers.toolset 4.14.0",
+  "reference_assemblies": "microsoft.netframework.referenceassemblies.net48 1.0.3"
+}

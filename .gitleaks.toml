@@ -1,0 +1,10 @@
+# gitleaks configuration: default rules plus one allowlisted constant.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = """Windows DPAPI blob header (base64 of the DPAPI version + the fixed provider GUID). It is a public, \
+well-known constant, not a secret. The selftests use it to build a fake "DPAPI blob that won't decrypt" \
+(windows/AgentRecorder.cs config/multi-account selftests and their twins in macos/Sources/RecitbotCore/SelfTest*.swift)."""
+regexTarget = "match"
+regexes = ['''AQAAANCMnd8BFdERjHoAwE/Cl\+sBAAAA''']

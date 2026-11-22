@@ -1,0 +1,152 @@
+// Recitbot Worker: SELF-HOST TEMPLATE. Copy to worker/wrangler.jsonc (git-ignored) and replace every REPLACE_ME /
+// example value. The setup bot fills these in during install; SELFHOST_CONFIG.md explains each one.
+// Deploy with `npm run deploy:prod` (it deploys `env.production` of worker/wrangler.jsonc).
+// Top level = LOCAL DEV against your own config (Miniflare). Most people use worker/wrangler.test.jsonc for that instead.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  // Setup bot: your Cloudflare account id (dashboard sidebar, or `wrangler whoami`).
+  "account_id": "REPLACE_ME_CLOUDFLARE_ACCOUNT_ID",
+  "name": "recitbot-local",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-15",
+  "compatibility_flags": ["nodejs_compat"],
+  // invocation_logs stay off: request URLs carry owner links.
+  "observability": { "enabled": true, "logs": { "invocation_logs": false } },
+  // run_worker_first: true = every request reaches the Worker first, so the host gate (src/hosts.ts, src/custom-host.ts)
+  // decides before any file is served: customer domains never get the homepage, installers, ... Our hosts get the asset
+  // server's files through env.ASSETS once no route matched (src/index.ts staticAsset).
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  "d1_databases": [{ "binding": "DB", "database_name": "recitbot-local", "database_id": "local-only", "migrations_dir": "migrations" }],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "recitbot-local-media" }],
+  "durable_objects": {
+    "bindings": [
+      { "name": "DEVICE_HUB", "class_name": "DeviceHub" },
+      { "name": "GOVERNOR", "class_name": "Governor" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DeviceHub", "Governor"] }],
+  "triggers": { "crons": ["0 * * * *"] },
+  "vars": {
+    "DEV_MODE": "true",
+    "SERVICE_MODE": "ON",
+    "ALLOW_URL_KEY": "false",
+    "GLOBAL_MAX_VIDEOS_PER_DAY": "3500",
+    "GLOBAL_MAX_TRANSCRIBE_MIN_PER_DAY": "7000",
+    // Cloudflare's documented always-pass Turnstile test keys (public; local dev only, never production).
+    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+    "TURNSTILE_SECRET_KEY": "1x0000000000000000000000000000000AA"
+  },
+  // Secrets (never in this file): `wrangler secret put <NAME> --env production`; worker/.dev.vars locally.
+  //   Required: SHARE_HMAC_KEY, UPLOAD_HMAC_KEY, DEVICE_CMD_KEY, IP_HASH_KEY, INSTALLER_URL_KEY (random, 32+ bytes each).
+  //   Setup: OWNER_CLAIM_SECRET (random, 32+ bytes: the one-time owner claim, POST /claim; delete it once claimed).
+  //   Optional:
+  //             TURNSTILE_SITE_KEY + TURNSTILE_SECRET_KEY (sign-in bot check, viewer comments),
+  //             STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET (billing), CF_SAAS_API_TOKEN (custom domains).
+  "env": {
+    "production": {
+      // Setup bot: the Worker's name in your account.
+      "name": "recitbot",
+      // workers.dev on: the Worker answers on <name>.<subdomain>.workers.dev too (always one of "our" hosts).
+      "workers_dev": true,
+      // Setup bot: your own domain(s), as Workers Custom Domains (the zone must be on this Cloudflare account). Remove
+      // "routes" to run on workers.dev only (then leave PUBLIC_BASE_URL unset or set it to the workers.dev URL).
+      "routes": [
+        { "pattern": "videos.example.com", "custom_domain": true }
+        // Optional MCP host: { "pattern": "mcp.example.com", "custom_domain": true },
+        // Optional, custom domains (Cloudflare for SaaS): { "pattern": "*/*", "zone_name": "example.com" }
+      ],
+      "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+      // Workers AI: transcription. Remove it to run without transcripts.
+      "ai": { "binding": "AI" },
+      // Setup bot: `wrangler d1 create recitbot`, then paste its database_id here.
+      "d1_databases": [
+        { "binding": "DB", "database_name": "recitbot", "database_id": "REPLACE_ME_D1_DATABASE_ID", "migrations_dir": "migrations" }
+      ],
+      // Setup bot: `wrangler r2 bucket create recitbot-media` (keep it private: no public bucket, no r2.dev).
+      "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "recitbot-media" }],
+      // Optional, off: Cloudflare Email Sending (sign-in codes). Needs EMAIL_FROM on a domain verified for Email Sending.
+      // "send_email": [{ "name": "EMAIL" }],
+      "durable_objects": {
+        "bindings": [
+          { "name": "DEVICE_HUB", "class_name": "DeviceHub" },
+          { "name": "GOVERNOR", "class_name": "Governor" }
+        ]
+      },
+      "triggers": { "crons": ["0 * * * *"] },
+      "vars": {
+        "DEV_MODE": "false",
+        "SERVICE_MODE": "ON",
+        // "free" = settings that fit the Workers Free plan (docs/workers-free-plan.md). On Workers Paid: "paid".
+        "WORKERS_PLAN": "free",
+        "ALLOW_URL_KEY": "false",
+        // Daily ceilings across all accounts (recordings started, transcription minutes).
+        "GLOBAL_MAX_VIDEOS_PER_DAY": "2000",
+        "GLOBAL_MAX_TRANSCRIBE_MIN_PER_DAY": "400",
+
+        // ---- Site (setup bot fills these in) ----
+        // The origin every link uses (share links, installer, sign-in). Usually your first route.
+        "PUBLIC_BASE_URL": "https://videos.example.com",
+        // Optional: a separate MCP host (its own OAuth issuer). Unset = PUBLIC_BASE_URL.
+        // "MCP_BASE_URL": "https://mcp.example.com",
+        // Optional: more hostnames that are this site's (comma-separated), e.g. www.
+        // "SITE_HOSTNAMES": "www.videos.example.com",
+        // Optional: the zone whose other names are reserved (404). Unset = PUBLIC_BASE_URL's host.
+        // "SITE_ZONE": "example.com",
+        // Optional: switches branding on (a name, and the product's logo, in pages and emails). Unset = none.
+        // "BRAND_NAME": "Recitbot",
+        // Optional: "true" serves your own homepage (worker/home, not part of the repository) on "/". Normally off.
+        "HOME_SITE_ENABLED": "false",
+        // Only for the homepage (all five, or it stays off): footer name and link, the company on the legal pages, card
+        // statement line, bot link.
+        // "OPERATOR_NAME": "REPLACE_ME",
+        // "OPERATOR_URL": "https://example.com",
+        // "LEGAL_ENTITY_NAME": "REPLACE_ME",
+        // "STATEMENT_DESCRIPTOR": "REPLACE_ME",
+        // "TEMPLATE_URL": "https://example.com/your-bot-template",
+        // Optional: the "Powered by" / watermark link and the MCP docs link. Unset = PUBLIC_BASE_URL / none.
+        // "HOME_URL": "https://example.com",
+        // "DOCS_URL": "https://example.com/docs/mcp",
+        // Optional: ISO country codes (or EU_EEA_UK) refused the MCP, sign-in and installer routes (451). Unset = none.
+        // "BLOCKED_COUNTRIES": "",
+
+        // ---- Email and contacts ----
+        // Optional, off: sender of sign-in codes (a domain verified for Cloudflare Email Sending), with send_email above.
+        // Nobody needs to sign in on a self-hosted server: the owner's key comes from POST /claim.
+        // "EMAIL_FROM": "hello@example.com",
+        // Optional: shown in messages to users and on the report page. Unset = EMAIL_FROM.
+        // "SUPPORT_EMAIL": "support@example.com",
+        // "ABUSE_EMAIL": "abuse@example.com",
+
+        // ---- Owners ----
+        // Account ids (comma-separated) with no plan limits and the operator tools. Leave it empty: the account that claims
+        // the server (OWNER_CLAIM_SECRET, POST /claim) is the owner, and setting this closes the claim.
+        "OWNER_ACCOUNT_IDS": "",
+
+        // ---- Turnstile ----
+        // Set the TURNSTILE_SITE_KEY / TURNSTILE_SECRET_KEY secrets for a bot check on sign-in and viewer comments.
+        // "true" (and no keys) = no bot check: nobody signs in here by default, and viewer comments stay closed. With email
+        // sign-in on, set the keys and remove this (otherwise sign-in emails are only rate-limited).
+        "TURNSTILE_DISABLED": "true",
+
+        // ---- Signups ----
+        // Exactly "true" closes new signups; existing accounts sign in as normal, and the owner claim still works. Unset =
+        // signups are open (by email, once that is on).
+        "SIGNUPS_DISABLED": "true",
+        // Optional, only while SIGNUPS_DISABLED is "true": these emails (comma-separated, any case) may still sign up.
+        // "SIGNUPS_ALLOWLIST": "you@example.com",
+
+        // ---- Billing (optional; off unless STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and STRIPE_PRO_PRICE_ID are all set) ----
+        // "STRIPE_PRO_PRICE_ID": "price_PLACEHOLDER_PRO",
+        // "STRIPE_PRO_YEARLY_PRICE_ID": "price_PLACEHOLDER_PRO_YEARLY",
+        // "STRIPE_TEAMS_PRICE_ID": "price_PLACEHOLDER_TEAMS",
+        // "STRIPE_TEAMS_YEARLY_PRICE_ID": "price_PLACEHOLDER_TEAMS_YEARLY",
+        // "STRIPE_PORTAL_CONFIG_ID": "bpc_PLACEHOLDER",
+        // "STRIPE_STORAGE_ADDON_PRICE_ID": "price_PLACEHOLDER_STORAGE_ADDON",
+
+        // ---- Custom video domains (optional; Cloudflare for SaaS on your zone; also needs the CF_SAAS_API_TOKEN secret) ----
+        // "CF_ZONE_ID": "REPLACE_ME_ZONE_ID",
+        // "CUSTOM_DOMAIN_CNAME_TARGET": "customers.example.com"
+      }
+    }
+  }
+}

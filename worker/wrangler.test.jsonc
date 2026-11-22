@@ -1,0 +1,54 @@
+// Recitbot Worker: LOCAL DEV and TESTS only (Miniflare). Committed, so a fresh clone runs `npm test` and `npm run dev`
+// with no private file. Every binding is local; every domain is a placeholder under the reserved .test TLD (RFC 2606).
+// Never deploy with this file: a deployment uses its own git-ignored worker/wrangler.jsonc (start from
+// worker/wrangler.example.jsonc; SELFHOST_CONFIG.md lists every value).
+// Secrets: vitest.config.ts generates random ones per run; `npm run dev:vars` writes them to worker/.dev.vars for dev.
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "recitbot-local",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true, "logs": { "invocation_logs": false } },
+  // run_worker_first: every request reaches the Worker first, so the host gate (src/hosts.ts, src/custom-host.ts) decides
+  // before any file is served (see wrangler.example.jsonc).
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  "d1_databases": [{ "binding": "DB", "database_name": "recitbot-local", "database_id": "local-only", "migrations_dir": "migrations" }],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "recitbot-local-media" }],
+  "send_email": [{ "name": "EMAIL" }],
+  "durable_objects": {
+    "bindings": [
+      { "name": "DEVICE_HUB", "class_name": "DeviceHub" },
+      { "name": "GOVERNOR", "class_name": "Governor" }
+    ]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DeviceHub", "Governor"] }],
+  "triggers": { "crons": ["0 * * * *"] },
+  "vars": {
+    "DEV_MODE": "true",
+    "SERVICE_MODE": "ON",
+    "ALLOW_URL_KEY": "false",
+    "GLOBAL_MAX_VIDEOS_PER_DAY": "3500",
+    "GLOBAL_MAX_TRANSCRIBE_MIN_PER_DAY": "7000",
+    // No PUBLIC_BASE_URL: links use the request's origin (the test suite's is https://rec.example, dev's is loopback).
+    // Our hosts and zone, as a deployment would set them; the first entry is the canonical host.
+    "SITE_HOSTNAMES": "example.test,www.example.test,mcp.example.test",
+    "SITE_ZONE": "example.test",
+    "MCP_BASE_URL": "https://mcp.example.test",
+    "HOME_SITE_ENABLED": "true",
+    "OPERATOR_NAME": "Example Operator",
+    "OPERATOR_URL": "https://operator.example.test",
+    "LEGAL_ENTITY_NAME": "Example & Sons Ltd.",
+    "STATEMENT_DESCRIPTOR": "EXAMPLE* VIDEO",
+    "TEMPLATE_URL": "https://bots.example.test/add/recorder",
+    "BLOCKED_COUNTRIES": "EU_EEA_UK",
+    "EMAIL_FROM": "hello@example.test",
+    "SUPPORT_EMAIL": "hello@example.test",
+    "ABUSE_EMAIL": "abuse@example.test",
+    // Custom domains: CF_SAAS_API_TOKEN and CF_ZONE_ID are unset, so they stay off unless a test sets both.
+    "CUSTOM_DOMAIN_CNAME_TARGET": "customers.example.test",
+    // Cloudflare's documented always-pass Turnstile test keys (public; local dev and tests only, never production).
+    "TURNSTILE_SITE_KEY": "1x00000000000000000000AA",
+    "TURNSTILE_SECRET_KEY": "1x0000000000000000000000000000000AA"
+  }
+}

@@ -1,0 +1,232 @@
+/* Recitbot share page: branding, custom player, transcript. Served from /s/ (CSP allows nothing inline). */
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/space-grotesk-700.woff2) format("woff2")}
+@font-face{font-family:Inter;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/inter-var.woff2) format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/jetbrains-mono-500.woff2) format("woff2")}
+
+:root{
+  --ink:#111318;--paper:#F5F3EE;--red:#F2463A;--graphite:#5B606B;--teal:#1FA89A;--blush:#FFE1DC;
+  --muted:#A3A8B3;--panel:#1A1D24;--line:#262A33;
+  --ui:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --head:"Space Grotesk",var(--ui);
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:var(--ink);color:var(--paper);font:400 15px/1.55 var(--ui)}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--blush);outline-offset:2px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+.top{border-bottom:1px solid var(--line)}
+.top{padding:8px 12px}
+.top img{display:block;height:64px;width:auto}
+main{flex:1;width:100%;max-width:1360px;margin:0 auto;padding:20px 16px 32px}
+h1{font:700 clamp(22px,4.2vw,32px)/1.15 var(--head);letter-spacing:-.01em;margin:0 0 14px;overflow-wrap:anywhere;text-wrap:balance}
+.muted{color:var(--muted)}
+.chip{display:inline-block;margin:0 0 14px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--muted)}
+.foot{padding:18px 20px 24px;color:var(--muted);font-size:13px;text-align:center}
+/* Customer-host pages (brand-page.ts): the brand's logo and name; the colours come from the page's hashed inline style. */
+.brand{display:flex;align-items:center;gap:12px;min-height:64px}
+.top.brand img{height:48px;width:auto;max-width:min(240px,60vw);object-fit:contain}
+.bn{font:700 20px/1.2 var(--head);overflow-wrap:anywhere}
+/* "Powered by Recitbot" + Report: fixed colours (no variables), so branding can't restyle or hide it. */
+.pwr{display:block!important;visibility:visible!important;opacity:1!important;margin:0;padding:14px 20px 18px;background:#111318!important;color:#f5f3ee!important;border-top:1px solid #262a33;font:400 13px/1.5 Inter,system-ui,sans-serif!important;text-align:center}
+.pwr a{color:#f5f3ee!important;text-decoration:underline!important}
+
+/* ---------- title row (title, byline, owner's Share) + description; the owner edits the same text in place ---------- */
+.vtitle{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 14px}
+.vtitle h1{margin:0}
+.tl{display:flex;align-items:center;gap:4px;min-width:0;max-width:100%}
+.by{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+.av{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--teal);color:var(--ink);font:700 13px/1 var(--ui)}
+p.desc{max-width:72ch;margin:-6px 0 14px;white-space:pre-line;overflow-wrap:anywhere}
+.meta{margin:0}
+.dl{display:flex;align-items:flex-start;gap:4px;max-width:72ch;margin:-6px 0 6px}
+.dl p.desc{margin:0;min-width:0}
+.dl p.desc.fb{color:var(--muted)}
+.dl p.desc.fb.on{color:inherit}
+.vstats{display:flex;flex-wrap:wrap;gap:4px 16px;list-style:none;margin:0 0 10px;padding:0;font:400 13px/20px var(--ui);color:var(--muted)}
+.ed{cursor:text;border-radius:6px;outline-offset:3px}
+.ed.on{outline:2px solid var(--teal);background:var(--panel)}
+.ed:empty::before{content:attr(data-placeholder);color:var(--muted)}
+.pen{flex:none;display:inline-grid;place-items:center;width:44px;height:44px;margin:-8px 0;padding:0;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer}
+.pen:hover{color:var(--paper);background:rgba(245,243,238,.08)}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.st{min-height:20px;margin:0 0 8px;font:400 12px/20px var(--ui);color:var(--muted)}
+.st.err{color:var(--blush)}
+.shr-w{margin-left:auto}
+.shr{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--paper);font:600 15px/1 var(--ui);cursor:pointer}
+.shr:hover{border-color:var(--muted)}
+a.shr{text-decoration:none}
+.dlb{margin-left:auto}
+.dlb+.shr-w{margin-left:8px}
+.pop{position:absolute;right:0;top:calc(100% + 8px);z-index:5;width:min(360px,100%);padding:14px;border:1px solid #3a3f4a;border-radius:12px;background:var(--panel);box-shadow:0 12px 32px rgba(0,0,0,.55)}
+.pop-h{margin:0 0 10px;font:700 16px/1.2 var(--head)}
+.pop-row{display:flex;gap:8px}
+.pop-url{flex:1;min-width:0;min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--ink);color:var(--paper);font:400 13px var(--mono)}
+.cpb{flex:none;min-width:96px;min-height:44px;padding:0 14px;border:0;border-radius:8px;background:var(--red);color:var(--paper);font:600 14px/1 var(--ui);cursor:pointer}
+.pop-n{margin:10px 0 0;font-size:13px;color:var(--muted)}
+
+/* layout: stacked on phones and portrait tablets, video + transcript side by side from 900px. Side by side, the
+   transcript is exactly as tall as the player: contain:size keeps it out of the row's height, which is the player's
+   (16:9 from its width), and align-self:stretch fills that row. Pure CSS, so no layout work in script and no shift. */
+.layout{display:grid;gap:20px}
+@media (min-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr) 300px;align-items:start}
+  .tx{contain:size;align-self:stretch}
+}
+@media (min-width:1200px){.layout{grid-template-columns:minmax(0,1fr) 360px}}
+
+/* ---------- player ---------- */
+.player{position:relative;margin:0;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.player video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+.player:fullscreen{border-radius:0;aspect-ratio:auto;width:100%;height:100%}
+.player:-webkit-full-screen{border-radius:0;aspect-ratio:auto;width:100%;height:100%}
+.player{container-type:inline-size}
+
+/* Free-plan watermark: ~4% of the video height (16:9, so 2.25cqw), lifted above the custom controls while they show */
+.wm{position:absolute;right:1.5%;bottom:3%;z-index:2;display:flex;align-items:center;gap:.35em;height:clamp(14px,2.25cqw,40px);padding:0 .6em 0 .45em;border-radius:999px;background:rgba(17,19,24,.6);color:var(--paper);font:700 clamp(9px,1.35cqw,24px)/1 var(--head);text-decoration:none;opacity:.7;pointer-events:auto;transition:bottom .25s,opacity .2s}
+.wm:hover,.wm:focus-visible{opacity:1}
+.wm svg{height:62%;width:auto;flex:none}
+.on:not(.idle) .wm{bottom:calc(3% + 78px)}
+
+.ctl,.big{display:none}
+.on .ctl{display:block}
+.on .big{display:grid}
+.on.idle{cursor:none}
+
+.big{position:absolute;inset:0;margin:auto;width:76px;height:76px;place-items:center;border:0;border-radius:50%;background:var(--red);color:var(--paper);cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.45);transition:transform .15s,opacity .2s}
+.big:hover{transform:scale(1.06)}
+.big svg{width:34px;height:34px;margin-left:4px}
+.playing .big{opacity:0;pointer-events:none}
+.fail{position:absolute;left:12px;right:12px;top:12px;margin:0;padding:10px 14px;border-radius:10px;background:var(--ink);border:1px solid var(--line);color:var(--blush);font-size:14px;text-align:center}
+
+.ctl{position:absolute;left:0;right:0;bottom:0;padding:28px 10px 6px;background:linear-gradient(transparent,rgba(17,19,24,.88) 55%);transition:opacity .25s,transform .25s}
+.idle .ctl{opacity:0;transform:translateY(8px);pointer-events:none}
+
+.scrub{position:relative;height:28px;margin:0 6px;cursor:pointer;touch-action:none;display:flex;align-items:center}
+.track{position:relative;width:100%;height:4px;border-radius:2px;background:rgba(245,243,238,.22);transition:height .12s}
+.scrub:hover .track,.scrub.drag .track,.scrub:focus-visible .track{height:6px}
+.buf,.fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:inherit}
+.buf{background:rgba(245,243,238,.38)}
+.fill{background:var(--teal)}
+.knob{position:absolute;top:50%;left:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--paper);box-shadow:0 0 0 3px rgba(31,168,154,.45);transform:scale(0);transition:transform .12s}
+.scrub:hover .knob,.scrub.drag .knob,.scrub:focus-visible .knob{transform:scale(1)}
+.scrub:focus-visible{outline:none}
+.scrub:focus-visible .track{outline:2px solid var(--blush);outline-offset:4px}
+.tip{position:absolute;bottom:30px;left:0;transform:translateX(-50%);padding:3px 7px;border-radius:6px;background:var(--ink);border:1px solid var(--line);font:500 12px/1.3 var(--mono);color:var(--paper);pointer-events:none;white-space:nowrap}
+
+.bar{display:flex;align-items:center;gap:2px}
+.b{display:inline-grid;place-items:center;min-width:44px;height:44px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--paper);font:600 14px/1 var(--ui);cursor:pointer}
+.b:hover{background:rgba(245,243,238,.12)}
+.b svg{width:24px;height:24px;fill:currentColor}
+.time{padding:0 8px;font:500 13px/1 var(--mono);color:var(--paper);white-space:nowrap}
+.time .of{color:var(--muted)}
+.grow{flex:1}
+.vol{display:flex;align-items:center}
+.vol input{width:84px;accent-color:var(--teal);cursor:pointer}
+.speed{position:relative;display:inline-flex;align-items:center}
+.speed select{appearance:none;-webkit-appearance:none;height:44px;min-width:56px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--paper);font:600 14px/1 var(--ui);text-align:center;cursor:pointer}
+.speed select:hover{background:rgba(245,243,238,.12)}
+.speed option{background:var(--ink);color:var(--paper)}
+
+/* icon swaps driven by state classes on .player */
+.i-pause,.i-muted,.i-exit{display:none}
+.playing .i-play{display:none}.playing .i-pause{display:block}
+.muted-on .i-vol{display:none}.muted-on .i-muted{display:block}
+.fs .i-enter{display:none}.fs .i-exit{display:block}
+.novol .vol input{display:none}
+
+@media (max-width:600px){
+  main{padding:14px 0 24px}
+  main>h1,.vtitle,.chip,p.desc,.dl,.st,.vstats{margin-left:16px;margin-right:16px}
+  .dl p.desc{margin:0}
+  .shr-w,.dlb{margin-left:0}
+  .pop{left:0;width:auto}
+  .player{border-radius:0}
+  .b{min-width:48px;height:48px}
+  .speed select{height:48px}
+  .vol input{display:none}
+  .big{width:68px;height:68px}
+  .top img{height:52px}
+  .tx{margin:0 16px}
+}
+
+/* ---------- transcript ---------- */
+.tx{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;min-height:0}
+.tx h2{margin:0;padding:14px 16px 10px;font:700 16px/1.2 var(--head);border-bottom:1px solid var(--line)}
+/* Long transcripts scroll inside the list (player.js eases its scrollTop to follow playback; never the page).
+   Stacked: capped so the page stays scrollable past it. Side by side: whatever the player's height leaves. */
+.tx ol{position:relative;list-style:none;margin:0;padding:6px;overflow-y:auto;max-height:min(55vh,480px);overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:var(--sb) transparent}
+@media (min-width:900px){.tx ol{max-height:none;flex:1;min-height:0}}
+/* Thin scrollbar: Paper at low opacity, the panel showing through (the page is Ink, so the thumb is the light one). */
+.tx{--sb:rgba(245,243,238,.2);--sb-hover:rgba(245,243,238,.34)}
+.tx ol::-webkit-scrollbar{width:8px}
+.tx ol::-webkit-scrollbar-track{background:transparent}
+.tx ol::-webkit-scrollbar-thumb{background:var(--sb);background-clip:padding-box;border:2px solid transparent;border-radius:8px}
+.tx ol::-webkit-scrollbar-thumb:hover{background-color:var(--sb-hover)}
+.tx p{margin:0;padding:14px 16px}
+/* Fixed timestamp column (always mm:ss, 13px mono): an auto column re-flowed every line when the mono font swapped in. */
+button.l{all:unset;box-sizing:border-box;display:grid;grid-template-columns:42px minmax(0,1fr);gap:12px;width:100%;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--paper)}
+button.l:hover{background:rgba(245,243,238,.06)}
+button.l:focus-visible{outline:2px solid var(--blush);outline-offset:-2px}
+button.l[aria-current="true"]{background:rgba(31,168,154,.16)}
+.t{font:500 13px/1.7 var(--mono);color:var(--teal);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- comments (shared videos). Server-rendered at final size: the Turnstile box is reserved at the widget's
+   300x65, so nothing below moves when comments.js and Turnstile load. ---------- */
+.cm{max-width:760px;margin:32px 0 0}
+.cm h2{display:flex;align-items:center;gap:10px;margin:0 0 14px;font:700 20px/1.2 var(--head)}
+.cm-n{padding:2px 9px;border:1px solid var(--line);border-radius:999px;font:500 13px/18px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.cm-form{display:flex;flex-direction:column;gap:12px;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.cm-f{display:flex;flex-direction:column;gap:6px}
+.cm-f label{font-size:13px;color:var(--muted)}
+.cm-f input,.cm-f textarea{display:block;width:100%;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--ink);color:var(--paper);font:400 15px/1.5 var(--ui)}
+.cm-f input{height:44px;max-width:320px}
+.cm-f textarea{height:calc(4.5em + 22px);resize:vertical;min-height:calc(1.5em + 22px)}
+.cm-f input::placeholder,.cm-f textarea::placeholder{color:var(--muted);opacity:1}
+.cm-f input:focus-visible,.cm-f textarea:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.cm-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:24px}
+.cm-at{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);cursor:pointer}
+.cm-at input{width:18px;height:18px;margin:0;accent-color:var(--teal);cursor:pointer}
+.cm-at .mono{font:500 13px/1 var(--mono);color:var(--teal);font-variant-numeric:tabular-nums}
+.cm-row .n{font:400 12px/20px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.cm-row .n.near{color:var(--blush)}
+.cm-ts{min-height:65px;line-height:0}
+.cm-send .st{flex:1;margin:0;font-size:13px;color:var(--muted)}
+.cm-send .st.err{color:var(--blush)}
+.cm-post{flex:none;height:44px;padding:0 20px;font-size:15px}
+.cm-post:disabled{opacity:.6;cursor:default}
+.cm-as{display:flex;align-items:center;gap:8px;margin:0;font-size:14px;color:var(--muted)}
+.cm-as .c-a{color:var(--paper)}
+.cm-closed,.cm-empty{margin:16px 0 0}
+.badge{display:inline-block;padding:0 7px;border:1px solid rgba(31,168,154,.55);border-radius:999px;color:var(--teal);font:600 11px/18px var(--ui);letter-spacing:.05em;text-transform:uppercase}
+.cm-list{list-style:none;margin:14px 0 0;padding:0}
+.c{padding:12px 4px;border-top:1px solid var(--line)}
+.c-h{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;min-height:28px}
+.c-a{font-weight:600;color:var(--paper);overflow-wrap:anywhere}
+.c time{font-size:13px;color:var(--muted)}
+.c-t{all:unset;box-sizing:border-box;padding:3px 8px;border-radius:6px;background:rgba(31,168,154,.14);color:var(--teal);font:500 13px/18px var(--mono);font-variant-numeric:tabular-nums;cursor:pointer}
+.c-t:hover{background:rgba(31,168,154,.26)}
+.c-x{all:unset;box-sizing:border-box;margin-left:auto;padding:3px 8px;border-radius:6px;color:var(--muted);font:500 13px/18px var(--ui);cursor:pointer}
+.c-x:hover{background:rgba(245,243,238,.08);color:var(--paper)}
+.c-x[data-armed="1"]{color:var(--blush)}
+.c-t:focus-visible,.c-x:focus-visible{outline:2px solid var(--blush);outline-offset:1px}
+.c-b{margin:4px 0 0;white-space:pre-line;overflow-wrap:anywhere}
+@media (max-width:600px){.cm{margin:28px 16px 0}.cm-form{padding:14px}}
+
+/* ---------- message pages (expired link, passcode, limits) ---------- */
+.msg{max-width:520px;margin:8vh auto 0;padding:32px 24px;text-align:center}
+.msg .mark{width:72px;height:72px;margin:0 auto 18px;display:block}
+.msg p{color:var(--muted);margin:0 0 10px}
+.msg form{display:flex;flex-direction:column;gap:10px;margin-top:18px;text-align:left}
+.msg input{height:48px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--paper);font:400 16px var(--ui)}
+.msg input:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.btn{height:48px;border:0;border-radius:10px;background:var(--red);color:var(--paper);font:600 16px var(--ui);cursor:pointer}
+.err{color:var(--blush)!important}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
