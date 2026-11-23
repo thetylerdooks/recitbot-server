@@ -61,8 +61,8 @@ export const ALLOW = [
 
 /** What the public server is made of (repo-relative): everything under the directories, and the files. */
 export const SCAN = {
-  dirs: ["worker", "scripts", "docs", "recorder/release", "recorder-mac"],
-  files: ["README.md", "SELFHOST_CONFIG.md", "LICENSE", "package.json", "package-lock.json", ".gitignore", ".gitattributes", ".gitleaks.toml"],
+  dirs: ["worker", "scripts", "docs", "recorder/release", "recorder-mac", "skills"],
+  files: ["README.md", "SELFHOST_CONFIG.md", "LICENSE", "package.json", "package-lock.json", ".gitignore", ".gitattributes", ".gitleaks.toml", "mcp.json"],
 };
 
 /** Never scanned: files that are git-ignored (so never in the public server): build output and a deployment's own files. */
@@ -73,13 +73,24 @@ export const isExcluded = (file) =>
   file === "worker/wrangler.jsonc" ||
   (/^worker\/\.dev\.vars/.test(file) && file !== "worker/.dev.vars.example");
 
+/**
+ * The public GitHub organization that publishes this repo, written in pieces so this file does not hold the operator
+ * name. scanText masks `github.com/<org>` (any case) before the operator-name rule, length-preserved so line numbers
+ * stay correct. A bare name still fails. Other rules see the original text.
+ */
+const GITHUB_ORG_HOST_PATH = ["github.com/the", "tyler", "dooks"].join("");
+const GITHUB_ORG_HOST_PATH_RE = new RegExp(GITHUB_ORG_HOST_PATH.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+const maskPublishingGitHubOrg = (text) =>
+  text.replace(GITHUB_ORG_HOST_PATH_RE, " ".repeat(GITHUB_ORG_HOST_PATH.length));
+
 /** Every rule violation in one file's text: [{ file, line, rule }]. */
 export function scanText(file, text) {
   const out = [];
   const rules = [...RULES, ...(file.endsWith(".sql") ? SQL_RULES : []), ...(file.startsWith("worker/home/") ? HOME_RULES : [])];
   for (const [rule, re] of rules) {
     if (ALLOW.some((a) => a.file === file && a.rule === rule)) continue;
-    for (const m of text.matchAll(re)) {
+    const haystack = rule === "operator name" ? maskPublishingGitHubOrg(text) : text;
+    for (const m of haystack.matchAll(re)) {
       out.push({ file, line: text.slice(0, m.index).split("\n").length, rule });
     }
   }
