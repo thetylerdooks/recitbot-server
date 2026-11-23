@@ -27,7 +27,7 @@ const files = [
   ...load(import.meta.glob(["../../scripts/*.{mjs,mts,ps1,html}"], { query: "?raw", import: "default", eager: true })),
   ...load(import.meta.glob(["../../docs/**/*.md"], { query: "?raw", import: "default", eager: true })),
   ...load(
-    import.meta.glob(["../../README.md", "../../LICENSE", "../../SELFHOST_CONFIG.md", "../../package.json", "../../package-lock.json", "../../.gitleaks.toml", "../../mcp.json"], {
+    import.meta.glob(["../../README.md", "../../LICENSE", "../../SELFHOST_CONFIG.md", "../../package.json", "../../package-lock.json", "../../.gitleaks.toml", "../../docs/mcp.example.json"], {
       query: "?raw",
       import: "default",
       eager: true,
@@ -58,7 +58,7 @@ describe("self-host literal guard", () => {
         "SELFHOST_CONFIG.md",
         "package.json",
         ".gitleaks.toml",
-        "mcp.json",
+        "docs/mcp.example.json",
         "skills/recitbot-selfhost-getting-started/SKILL.md",
         "skills/recitbot-selfhost-playbook/SKILL.md",
         "recorder/release/install.ps1",

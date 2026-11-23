@@ -62,7 +62,7 @@ export const ALLOW = [
 /** What the public server is made of (repo-relative): everything under the directories, and the files. */
 export const SCAN = {
   dirs: ["worker", "scripts", "docs", "recorder/release", "recorder-mac", "skills"],
-  files: ["README.md", "SELFHOST_CONFIG.md", "LICENSE", "package.json", "package-lock.json", ".gitignore", ".gitattributes", ".gitleaks.toml", "mcp.json"],
+  files: ["README.md", "SELFHOST_CONFIG.md", "LICENSE", "package.json", "package-lock.json", ".gitignore", ".gitattributes", ".gitleaks.toml"],
 };
 
 /** Never scanned: files that are git-ignored (so never in the public server): build output and a deployment's own files. */
