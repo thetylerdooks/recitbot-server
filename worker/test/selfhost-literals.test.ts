@@ -27,13 +27,14 @@ const files = [
   ...load(import.meta.glob(["../../scripts/*.{mjs,mts,ps1,html}"], { query: "?raw", import: "default", eager: true })),
   ...load(import.meta.glob(["../../docs/**/*.md"], { query: "?raw", import: "default", eager: true })),
   ...load(
-    import.meta.glob(["../../README.md", "../../LICENSE", "../../SELFHOST_CONFIG.md", "../../package.json", "../../package-lock.json", "../../.gitleaks.toml"], {
+    import.meta.glob(["../../README.md", "../../LICENSE", "../../SELFHOST_CONFIG.md", "../../package.json", "../../package-lock.json", "../../.gitleaks.toml", "../../mcp.json"], {
       query: "?raw",
       import: "default",
       eager: true,
     }),
   ),
   ...load(import.meta.glob(["../../recorder/release/*.{md,json,ps1}", "../../recorder-mac/*.{md,json,sh,txt}"], { query: "?raw", import: "default", eager: true })),
+  ...load(import.meta.glob(["../../skills/**/*.md"], { query: "?raw", import: "default", eager: true })),
 ];
 
 describe("self-host literal guard", () => {
@@ -57,6 +58,9 @@ describe("self-host literal guard", () => {
         "SELFHOST_CONFIG.md",
         "package.json",
         ".gitleaks.toml",
+        "mcp.json",
+        "skills/recitbot-selfhost-getting-started/SKILL.md",
+        "skills/recitbot-selfhost-playbook/SKILL.md",
         "recorder/release/install.ps1",
         "recorder-mac/install.sh",
       ]),
@@ -74,8 +78,14 @@ describe("self-host literal guard", () => {
     expect(files.flatMap((f) => scanText(f.file, f.text))).toEqual([]);
   });
 
-  it("the license may name its licensor, and nothing else may", () => {
-    expect(ALLOW.map((a) => `${a.file}: ${a.rule}`)).toEqual(["LICENSE: numbered company name", "LICENSE: regional company name"]);
+  it("the license may name its licensor, and the README and Directory skills may name the publishing GitHub org", () => {
+    expect(ALLOW.map((a) => `${a.file}: ${a.rule}`)).toEqual([
+      "LICENSE: numbered company name",
+      "LICENSE: regional company name",
+      "README.md: operator name",
+      "skills/recitbot-selfhost-getting-started/SKILL.md: operator name",
+      "skills/recitbot-selfhost-playbook/SKILL.md: operator name",
+    ]);
     const name = ["1234567 ", "Albert", "a Ltd."].join("");
     expect(scanText("LICENSE", name)).toEqual([]);
     for (const f of ["README.md", "docs/LICENSE", "LICENSE.md", "worker/LICENSE", "worker/src/x.ts"]) {

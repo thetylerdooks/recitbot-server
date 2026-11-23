@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "recitbot": {
+      "url": "https://<your-worker>.<your-subdomain>.workers.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer ${RECITBOT_API_KEY}"
+      }
+    }
+  }
+}

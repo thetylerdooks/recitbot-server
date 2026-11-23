@@ -57,12 +57,16 @@ export const ALLOW = [
   // The license names its licensor, as it must; the text is verbatim. Nowhere else may that name appear.
   { file: "LICENSE", rule: "numbered company name", reason: "the licensor's legal name in the verbatim license text" },
   { file: "LICENSE", rule: "regional company name", reason: "the licensor's legal name in the verbatim license text" },
+  // The public GitHub organization that publishes this repo and the recorder releases is named in the README and the Directory skills; that is not a private deployment value.
+  { file: "README.md", rule: "operator name", reason: "the public GitHub organization that publishes this repo and the recorder releases" },
+  { file: "skills/recitbot-selfhost-getting-started/SKILL.md", rule: "operator name", reason: "the public GitHub organization that publishes this repo and the recorder releases" },
+  { file: "skills/recitbot-selfhost-playbook/SKILL.md", rule: "operator name", reason: "the public GitHub organization that publishes this repo and the recorder releases" },
 ];
 
 /** What the public server is made of (repo-relative): everything under the directories, and the files. */
 export const SCAN = {
-  dirs: ["worker", "scripts", "docs", "recorder/release", "recorder-mac"],
-  files: ["README.md", "SELFHOST_CONFIG.md", "LICENSE", "package.json", "package-lock.json", ".gitignore", ".gitattributes", ".gitleaks.toml"],
+  dirs: ["worker", "scripts", "docs", "recorder/release", "recorder-mac", "skills"],
+  files: ["README.md", "SELFHOST_CONFIG.md", "LICENSE", "package.json", "package-lock.json", ".gitignore", ".gitattributes", ".gitleaks.toml", "mcp.json"],
 };
 
 /** Never scanned: files that are git-ignored (so never in the public server): build output and a deployment's own files. */
