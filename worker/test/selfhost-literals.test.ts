@@ -78,14 +78,8 @@ describe("self-host literal guard", () => {
     expect(files.flatMap((f) => scanText(f.file, f.text))).toEqual([]);
   });
 
-  it("the license may name its licensor, and the README and Directory skills may name the publishing GitHub org", () => {
-    expect(ALLOW.map((a) => `${a.file}: ${a.rule}`)).toEqual([
-      "LICENSE: numbered company name",
-      "LICENSE: regional company name",
-      "README.md: operator name",
-      "skills/recitbot-selfhost-getting-started/SKILL.md: operator name",
-      "skills/recitbot-selfhost-playbook/SKILL.md: operator name",
-    ]);
+  it("the license may name its licensor, and nothing else may", () => {
+    expect(ALLOW.map((a) => `${a.file}: ${a.rule}`)).toEqual(["LICENSE: numbered company name", "LICENSE: regional company name"]);
     const name = ["1234567 ", "Albert", "a Ltd."].join("");
     expect(scanText("LICENSE", name)).toEqual([]);
     for (const f of ["README.md", "docs/LICENSE", "LICENSE.md", "worker/LICENSE", "worker/src/x.ts"]) {
@@ -95,6 +89,17 @@ describe("self-host literal guard", () => {
     expect(scanText("LICENSE", ["sk", "_live_", "x"].join("")).map((v) => v.rule)).toEqual(["Stripe API key"]);
     const license = files.find((f) => f.file === "LICENSE")!.text;
     expect(license).toContain("Elastic License 2.0");
+  });
+
+  it("a public GitHub org URL is not an operator name, but a bare name in a skill still is", () => {
+    const skill = "skills/recitbot-selfhost-playbook/SKILL.md";
+    const orgUrl = ["https://github.com/the", "tyler", "dooks/recitbot-screen-recorder"].join("");
+    expect(scanText(skill, `Recorder: ${orgUrl}`)).toEqual([]);
+    expect(scanText("README.md", orgUrl)).toEqual([]);
+    expect(scanText("README.md", orgUrl.toUpperCase())).toEqual([]);
+    expect(scanText(skill, ["Tyler", " Dooks"].join("")).map((v) => v.rule)).toEqual(["operator name"]);
+    expect(scanText(skill, ["t", "dooks"].join("")).map((v) => v.rule)).toEqual(["operator name"]);
+    expect(scanText(skill, `Built by ${["Tyler", " Dooks"].join("")} ${orgUrl}`).map((v) => v.rule)).toEqual(["operator name"]);
   });
 
   it("each rule catches what it is for (samples built at run time, so this file holds none)", () => {

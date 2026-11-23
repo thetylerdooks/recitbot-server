@@ -57,10 +57,6 @@ export const ALLOW = [
   // The license names its licensor, as it must; the text is verbatim. Nowhere else may that name appear.
   { file: "LICENSE", rule: "numbered company name", reason: "the licensor's legal name in the verbatim license text" },
   { file: "LICENSE", rule: "regional company name", reason: "the licensor's legal name in the verbatim license text" },
-  // The public GitHub organization that publishes this repo and the recorder releases is named in the README and the Directory skills; that is not a private deployment value.
-  { file: "README.md", rule: "operator name", reason: "the public GitHub organization that publishes this repo and the recorder releases" },
-  { file: "skills/recitbot-selfhost-getting-started/SKILL.md", rule: "operator name", reason: "the public GitHub organization that publishes this repo and the recorder releases" },
-  { file: "skills/recitbot-selfhost-playbook/SKILL.md", rule: "operator name", reason: "the public GitHub organization that publishes this repo and the recorder releases" },
 ];
 
 /** What the public server is made of (repo-relative): everything under the directories, and the files. */
@@ -77,13 +73,24 @@ export const isExcluded = (file) =>
   file === "worker/wrangler.jsonc" ||
   (/^worker\/\.dev\.vars/.test(file) && file !== "worker/.dev.vars.example");
 
+/**
+ * The public GitHub organization that publishes this repo, written in pieces so this file does not hold the operator
+ * name. scanText masks `github.com/<org>` (any case) before the operator-name rule, length-preserved so line numbers
+ * stay correct. A bare name still fails. Other rules see the original text.
+ */
+const GITHUB_ORG_HOST_PATH = ["github.com/the", "tyler", "dooks"].join("");
+const GITHUB_ORG_HOST_PATH_RE = new RegExp(GITHUB_ORG_HOST_PATH.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+const maskPublishingGitHubOrg = (text) =>
+  text.replace(GITHUB_ORG_HOST_PATH_RE, " ".repeat(GITHUB_ORG_HOST_PATH.length));
+
 /** Every rule violation in one file's text: [{ file, line, rule }]. */
 export function scanText(file, text) {
   const out = [];
   const rules = [...RULES, ...(file.endsWith(".sql") ? SQL_RULES : []), ...(file.startsWith("worker/home/") ? HOME_RULES : [])];
   for (const [rule, re] of rules) {
     if (ALLOW.some((a) => a.file === file && a.rule === rule)) continue;
-    for (const m of text.matchAll(re)) {
+    const haystack = rule === "operator name" ? maskPublishingGitHubOrg(text) : text;
+    for (const m of haystack.matchAll(re)) {
       out.push({ file, line: text.slice(0, m.index).split("\n").length, rule });
     }
   }
